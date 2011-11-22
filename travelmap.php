@@ -9,20 +9,11 @@ Author URI: http://travelingswede.com
 License: GPL2
 */
 
-// Initiates the plugin
+// Initiate the plugin
 travelmap::init();
 
-/*
-TODO:
-- Separate maps to separate objects
-*/
+
 class travelmap {
-	
-	/* Keeps track of if a shortcode has been used on the current page. Used to determine if we need to load the plugin resources. */
-	static protected $shortcodeUsed;
-	
-	/* The public path to plugin dir */
-	static protected $pluginPath; 
 	
 	/* The default attributes for map shortcode */
 	static protected $mapDefaultAtts = array(
@@ -39,6 +30,23 @@ class travelmap {
 		'first'  => 1,
 		'last'   => false
 	);
+	
+	/* Used attributes - defaults overridden by specified atts */
+	static protected $mapAtts;
+	static protected $listAtts;
+	
+	/* Shortcode specific */
+	
+	/* URLs for external resources */
+	static protected $googleMapsUrl = 'maps.google.com/maps/api/js?sensor=false';
+	static protected $jQueryCssUrl  = 'ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/base/jquery-ui.css';
+	static protected $protocol      = 'http://';
+	
+	/* Keeps track of if a shortcode has been used on the current page. Used to determine if we need to load the plugin resources. */
+	static protected $shortcodeUsed;
+	
+	/* The public path to plugin dir */
+	static protected $pluginPath; 
 
 
 	public function init() {
@@ -60,23 +68,27 @@ class travelmap {
 
 	static public function show_map( $atts ) {
 	
-		// Supported attributes with defaults
-		extract( shortcode_atts( self::$mapDefaultAtts, $atts ) );
+		// Set attributes
+		self::$mapAtts = shortcode_atts( self::$mapDefaultAtts, $atts );
+		
+		// Set protocol
+		if (self::$mapAtts['ssl']) {
+			self::$protocol = 'https://';
+		}
 	
 		// Outputs variables neded by later js-files
 		$places = self::string_to_array( get_option( 'travelmap_data' ) );
 	
-		$places = self::filter_places( $places, $first, $last );
+		$places = self::filter_places( $places, self::$mapAtts['first'], self::$mapAtts['last'] );
 		if ($places === false)
 			return;
-	
 	
 		?>
 		<script type="text/javascript">
 		var travelmap_places = <?php echo json_encode( $places ) ?>;
 		var travelmap_plugin_dir = "<?php echo self::$pluginPath ?>";
-		var travelmap_markers = "<?php echo $markers ?>";
-		var travelmap_lines = "<?php echo $lines ?>";
+		var travelmap_markers = "<?php echo self::$mapAtts['markers'] ?>";
+		var travelmap_lines = "<?php echo self::$mapAtts['lines'] ?>";
 		</script>
 		<?php
 	
@@ -84,16 +96,15 @@ class travelmap {
 		self::$shortcodeUsed = true;
 	
 		// Returns the html required for the map
-		$map = '<div id="travelmap" style="height:' . $height . 'px; background:#FFFFFF; margin-bottom:1.5em;"></div>';
-		return $map;
+		return '<div id="travelmap" style="height:' . self::$mapAtts['height'] . 'px; background:#FFFFFF; margin-bottom:1.5em;"></div>';
 	}
 
 	
 	
 	static public function show_list( $atts ) {
 	
-		extract( shortcode_atts( self::$listDefaultAtts, $atts ) );
-	
+		self::$listAtts = shortcode_atts( self::$listDefaultAtts, $atts );
+		
 		$places = self::string_to_array( get_option( 'travelmap_data' ) );
 		$i = 1;
 		$list = '<tr><th></th><th>Destination</th><th>Arrival</th></tr>';
@@ -101,7 +112,7 @@ class travelmap {
 		if ( ! is_array($places) )
 			return;
 	
-		$places = self::filter_places( $places, $first, $last );
+		$places = self::filter_places( $places, self::$listAtts['first'], self::$listAtts['last'] );
 	
 		foreach ( $places as $place ) {
 	
@@ -170,7 +181,7 @@ class travelmap {
 		if ( ! self::$shortcodeUsed )
 			return;
 	
-		wp_register_script( 'google-maps', 'http://maps.google.com/maps/api/js?sensor=false', false, false, true );
+		wp_register_script( 'google-maps', self::$protocol . self::$googleMapsUrl, false, false, true );
 		wp_print_scripts( 'google-maps');
 	
 		wp_register_script( 'travelmap', plugins_url( 'travelmap.js', __FILE__ ), false, false, true );
@@ -196,7 +207,7 @@ class travelmap {
 		wp_register_script( 'datepicker', plugins_url( 'datepicker.js', __FILE__ ), false, false, true );
 		wp_enqueue_script( 'datepicker');
 	
-		wp_register_script( 'google-maps', 'http://maps.google.com/maps/api/js?sensor=false', false, false, true );
+		wp_register_script( 'google-maps', self::$protocol . self::$googleMapsUrl, false, false, true );
 		wp_enqueue_script( 'google-maps');
 	
 		wp_register_script( 'travelmap_admin', plugins_url( 'travelmap-admin.js', __FILE__ ), false, false, true );
@@ -287,7 +298,7 @@ class travelmap {
 	
 	
 	static public function add_stylesheet() {
-		wp_register_style( 'jquery-ui','http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/base/jquery-ui.css' );
+		wp_register_style( 'jquery-ui', self::$protocol . self::$jQueryCssUrl );
 		wp_register_style( 'travelmap', self::$pluginPath . 'screen.css' );
 		wp_enqueue_style( 'jquery-ui' );
 		wp_enqueue_style( 'travelmap' );
