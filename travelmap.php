@@ -1,17 +1,30 @@
 <?php
 /*
-Plugin Name: Travelmap
-Plugin URI: http://travelingswede.com/travelmap/
-Description: Shows your travel plans as a map
-Version: 1.4
-Author: Marcus Andersson
-Author URI: http://travelingswede.com
-License: GPL2
+Plugin Name:        Travelmap
+Plugin URI:         http://travelingswede.com/travelmap/
+Description:        Shows your travel plans on a Gogle map
+Version:            1.5
+Author:             Marcus Andersson
+Author URI:         http://travelingswede.com
+License:            GPL2
+
+Copyright 2010      Marcus Andersson marcus@mediascreen.se
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License version 2 or later
+as published by the Free Software Foundation.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-// Initiate the plugin
 travelmap::init();
-
 
 class travelmap {
 	
@@ -311,4 +324,3 @@ class travelmap {
 		return WP_PLUGIN_URL . '/' . str_replace( basename( __FILE__ ), "", plugin_basename( __FILE__ ) );
 	}
 }
-?>
