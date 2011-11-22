@@ -19,7 +19,7 @@ function initialize() {
 	var markersArray = [];
 
 	var options = {
-		mapTypeId: google.maps.MapTypeId.ROADMAP
+		mapTypeId: google.maps.MapTypeId[travelmap_maptype]
 	};
 
 	travelmap_map = new google.maps.Map(document.getElementById("travelmap"), options);

@@ -17,18 +17,19 @@ class travelmap {
 	
 	/* The default attributes for map shortcode */
 	static protected $mapDefaultAtts = array(
-		'height' => '300',
-		'first'  => 1,
-		'last'   => false,
-		'markers'=> true,
-		'lines'  => true,
-		'ssl'    => false
+		'height'  => '300',
+		'first'   => 1,
+		'last'    => false,
+		'markers' => true,
+		'lines'   => true,
+		'maptype' => 'roadmap',
+		'ssl'     => false
 	);
 	
 	/* The defautl attributes for list shortcode */
 	static protected $listDefaultAtts = array(
-		'first'  => 1,
-		'last'   => false
+		'first'   => 1,
+		'last'    => false
 	);
 	
 	/* Used attributes - defaults overridden by specified atts */
@@ -85,10 +86,11 @@ class travelmap {
 	
 		?>
 		<script type="text/javascript">
-		var travelmap_places = <?php echo json_encode( $places ) ?>;
+		var travelmap_places     = <?php echo json_encode( $places ) ?>;
 		var travelmap_plugin_dir = "<?php echo self::$pluginPath ?>";
-		var travelmap_markers = "<?php echo self::$mapAtts['markers'] ?>";
-		var travelmap_lines = "<?php echo self::$mapAtts['lines'] ?>";
+		var travelmap_markers    = "<?php echo self::$mapAtts['markers'] ?>";
+		var travelmap_lines      = "<?php echo self::$mapAtts['lines'] ?>";
+		var travelmap_maptype    = "<?php echo strtoupper(self::$mapAtts['maptype']) ?>";
 		</script>
 		<?php
 	
