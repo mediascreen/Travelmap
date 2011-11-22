@@ -1,0 +1,86 @@
+/* Public facing styles */
+#travelmap-list {
+	border-collapse:collapse;
+	width:100%;
+	margin-bottom:1.5em;
+}
+#travelmap-list th, td {
+	padding:2px 8px 2px 0px;
+	text-align:left;
+}
+#travelmap-list th {
+	border-bottom:dotted #CCC 1px;
+}
+#travelmap-list .present td {
+	border-top:dotted #CCC 1px;
+	border-bottom:dotted #CCC 1px;
+}
+#travelmap-list .present td:first-child {
+	background:url(img/bullet_star.png) no-repeat 12px center;
+	width:24px;
+}
+
+/* Admin styles */
+#travelmap-admin-table {
+	margin-bottom:.8em;
+	background-color:#FFFFEB;
+}
+#travelmap-admin-table td {
+	line-height:26px;
+	vertical-align:middle;
+	background-color:#FFF;
+}
+#travelmap-admin-table .handle {
+	width:16px;
+	padding-right:0px;
+	color:#666;
+}
+#travelmap-admin-table .handle .image {
+	display:inline-block;
+	height:16px;
+	width:16px;
+	background:url(img/transform_move.png) no-repeat center;
+	vertical-align:middle;
+}
+#travelmap-admin-table .count {
+	width:2em;
+	padding-right:0px;
+	text-align:right;
+}
+#travelmap-admin-table .city {
+	width:17%;
+	padding-right:2px;
+}
+#travelmap-admin-table .country {
+	width:15%;
+	padding-right:2px;
+}
+#travelmap-admin-table .url {
+	padding-right:2px;
+}
+#travelmap-admin-table .lat, #travelmap-admin-table .lng, #travelmap-admin-table .arrival {
+	width:7.6em;
+	padding-right:2px;
+}
+#travelmap-admin-table .buttons1 {
+	width:8.5em;
+	padding-left:2px;
+	padding-right:0px;
+}
+#travelmap-admin-table .buttons2 {
+	width:3em;
+	padding-left:0px;
+	padding-right:2px;
+}
+#travelmap-admin-table input {
+	width:100%;
+	margin:0;
+	vertical-align:middle;
+}
+#travelmap-admin-table a.delete {
+	font-size:80%;
+}
+
+.ui-datepicker, .ui-datepicker td {
+	font-size:11px;
+}
