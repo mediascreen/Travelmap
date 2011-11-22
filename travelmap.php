@@ -11,24 +11,32 @@ License: GPL2
 
 travelmap::init();
 
+/*
+TODO:
+- Move up config to constants
+- Move basic vars to top
+- Separate html to templates/includes
+- Separate maps to separate objects
+
+*/
 class travelmap {
 
 
 	public function init() {
-		add_shortcode( 'travelmap-map',   array( __class__, 'travelmap_show_map' ) );
-		add_shortcode( 'travelmap-list',  array( __class__, 'travelmap_show_list' ) );
+		add_shortcode( 'travelmap-map',   array( __class__, 'show_map' ) );
+		add_shortcode( 'travelmap-list',  array( __class__, 'show_list' ) );
 		
-		add_action( 'wp_print_styles',    array( __class__, 'travelmap_add_stylesheet' ) );
-		add_action( 'wp_footer',          array( __class__, 'travelmap_print_js' ) );
-		add_action( 'admin_menu',         array( __class__, 'travelmap_menu' ) );
-		add_action( 'admin_init',         array( __class__, 'travelmap_admin_init' ) );
-		add_action( 'admin_print_styles', array( __class__, 'travelmap_add_stylesheet' ) );
+		add_action( 'wp_print_styles',    array( __class__, 'add_stylesheet' ) );
+		add_action( 'wp_footer',          array( __class__, 'print_js' ) );
+		add_action( 'admin_menu',         array( __class__, 'menu' ) );
+		add_action( 'admin_init',         array( __class__, 'admin_init' ) );
+		add_action( 'admin_print_styles', array( __class__, 'add_stylesheet' ) );
 		
-		add_action( 'wp_ajax_nopriv_travelmap_ajax_save', array( __class__, 'travelmap_ajax_save' ) );
-		add_action( 'wp_ajax_travelmap_ajax_save',        array( __class__, 'travelmap_ajax_save' ) );
+		add_action( 'wp_ajax_nopriv_travelmap_ajax_save', array( __class__, 'ajax_save' ) );
+		add_action( 'wp_ajax_travelmap_ajax_save',        array( __class__, 'ajax_save' ) );
 	}
 
-	static public function travelmap_show_map( $atts ) {
+	static public function show_map( $atts ) {
 	
 		// Supported attributes with defaults
 		extract( shortcode_atts( array(
@@ -42,9 +50,9 @@ class travelmap {
 	
 	
 		// Outputs variables neded by later js-files
-		$places = self::travelmap_string_to_array( get_option( 'travelmap_data' ) );
+		$places = self::string_to_array( get_option( 'travelmap_data' ) );
 	
-		$places = self::travelmap_filter_places( $places, $first, $last );
+		$places = self::filter_places( $places, $first, $last );
 		if ($places === false)
 			return;
 	
@@ -52,7 +60,7 @@ class travelmap {
 		?>
 		<script type="text/javascript">
 		var travelmap_places = <?php echo json_encode( $places ); ?>;
-		var travelmap_plugin_dir = "<?php echo self::travelmap_get_plugin_path();?>";
+		var travelmap_plugin_dir = "<?php echo self::get_plugin_path();?>";
 		var travelmap_markers = "<?php echo $markers;?>";
 		var travelmap_lines = "<?php echo $lines;?>";
 		</script>
@@ -69,21 +77,21 @@ class travelmap {
 
 	
 	
-	static public function travelmap_show_list( $atts ) {
+	static public function show_list( $atts ) {
 	
 		extract( shortcode_atts( array(
 			'first'  => 1,
 			'last'   => false
 		), $atts ) );
 	
-		$places = self::travelmap_string_to_array( get_option( 'travelmap_data' ) );
+		$places = self::string_to_array( get_option( 'travelmap_data' ) );
 		$i = 1;
 		$list = '<tr><th></th><th>Destination</th><th>Arrival</th></tr>';
 	
 		if ( ! is_array($places) )
 			return;
 	
-		$places = self::travelmap_filter_places( $places, $first, $last );
+		$places = self::filter_places( $places, $first, $last );
 	
 		foreach ( $places as $place ) {
 	
@@ -114,7 +122,7 @@ class travelmap {
 	
 	
 	// Filter array of places to only contain entries between $first and $last from shortcode atts
-	static public function travelmap_filter_places( $places, $first, $last ) {
+	static public function filter_places( $places, $first, $last ) {
 		if ( ! is_array( $places ) )
 			return;
 	
@@ -151,7 +159,7 @@ class travelmap {
 	}
 	
 	
-	static public function travelmap_print_js() {
+	static public function print_js() {
 	
 		global $travel_shortcode_used;
 		if ( ! $travel_shortcode_used )
@@ -166,12 +174,12 @@ class travelmap {
 	
 	
 	
-	static public function travelmap_menu() {
-		add_options_page( 'Travelmap Options', 'Travelmap', 'manage_options', 'travelmap-options', array( __class__, 'travelmap_options' ) );
+	static public function menu() {
+		add_options_page( 'Travelmap Options', 'Travelmap', 'manage_options', 'travelmap-options', array( __class__, 'options' ) );
 	}
 	
 	
-	static public function travelmap_admin_init() {
+	static public function admin_init() {
 	
 		if ( $_GET['page'] !== 'travelmap-options') {
 			return;
@@ -195,7 +203,7 @@ class travelmap {
 	
 	
 	// Main function for outputing options page
-	static public function travelmap_options() {
+	static public function options() {
 	
 		if ( !current_user_can( 'manage_options' ) )  {
 			wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
@@ -232,7 +240,8 @@ class travelmap {
 			</thead>
 			<tbody>
 				<?php
-				$places = self::travelmap_string_to_array( get_option( 'travelmap_data' ) );
+				// TODO: Unused? Remove?
+				$places = self::string_to_array( get_option( 'travelmap_data' ) );
 				if ( is_array($places) ) {
 					foreach ( $places as $place ) {
 						$i++;
@@ -260,7 +269,7 @@ class travelmap {
 	}
 	
 	
-	static public function travelmap_ajax_save() {
+	static public function ajax_save() {
 	
 		if ( !current_user_can( 'manage_options' ) )  {
 			wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
@@ -285,7 +294,7 @@ class travelmap {
 	}
 	
 	
-	static public function travelmap_string_to_array( $input ) {
+	static public function string_to_array( $input ) {
 		$input = trim( $input, " ;\n" );
 		if ( empty($input) )
 			return false;
@@ -296,22 +305,22 @@ class travelmap {
 			list( $data['city'], $data['country'], $data['url'], $data['arrival'], $data['lat'], $data['lng'] ) = explode( ",", $row );
 			$places[] = array_reverse( array_map( "trim", $data ), true );
 		}
-		$places = self::travelmap_add_status( $places );
+		$places = self::add_status( $places );
 		return $places;
 	}
 	
 	
-	static public function travelmap_add_status( $places, $status = 'past' ) {
+	static public function add_status( $places, $status = 'past' ) {
 		foreach ($places as $place) {
 			$i++;
-			$place['status'] = $status = self::travelmap_get_date_status( $places[$i]['arrival'], $status );
+			$place['status'] = $status = self::get_date_status( $places[$i]['arrival'], $status );
 			$newPlaces[] = $place;
 		}
 		return $newPlaces;
 	}
 	
-	
-	static public function travelmap_get_date_status( $date, $prevStatus = 'past') {
+	// TODO: Use propper date functions
+	static public function get_date_status( $date, $prevStatus = 'past') {
 		if ($prevStatus == 'past') {
 			if (strtotime( $date ) > time() ) {
 				$status = 'present';
@@ -325,15 +334,15 @@ class travelmap {
 	}
 	
 	
-	static public function travelmap_add_stylesheet() {
+	static public function add_stylesheet() {
 		wp_register_style( 'jquery-ui','http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/base/jquery-ui.css' );
-		wp_register_style( 'travelmap', self::travelmap_get_plugin_path() . 'screen.css' );
+		wp_register_style( 'travelmap', self::get_plugin_path() . 'screen.css' );
 		wp_enqueue_style( 'jquery-ui' );
 		wp_enqueue_style( 'travelmap' );
 	}
 	
 	
-	static public function travelmap_get_plugin_path() {
+	static public function get_plugin_path() {
 		return WP_PLUGIN_URL . '/' . str_replace( basename( __FILE__ ), "", plugin_basename( __FILE__ ) );
 	}
 }
