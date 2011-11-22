@@ -49,8 +49,6 @@ class travelmap {
 	static protected $mapAtts;
 	static protected $listAtts;
 	
-	/* Shortcode specific */
-	
 	/* URLs for external resources */
 	static protected $googleMapsUrl = 'maps.google.com/maps/api/js?sensor=false';
 	static protected $jQueryCssUrl  = 'ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/base/jquery-ui.css';
@@ -212,9 +210,8 @@ class travelmap {
 	
 	static public function admin_init() {
 	
-		if ( $_GET['page'] !== 'travelmap-options') {
+		if ( $_GET['page'] !== 'travelmap-options')
 			return;
-		}
 	
 		// Include javascript
 		wp_enqueue_script( 'jquery-ui-sortable' );
@@ -237,7 +234,7 @@ class travelmap {
 	static public function options() {
 	
 		if ( !current_user_can( 'manage_options' ) )  {
-			wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
+			wp_die( __( 'You do not have sufficient permissions to access this page.' ), __('Access denied'), array( 'response' => 401 ) );
 		}
 	
 		$places = self::string_to_array( get_option( 'travelmap_data' ) );
@@ -248,16 +245,16 @@ class travelmap {
 	
 	
 	static public function ajax_save() {
-	
-		if ( !current_user_can( 'manage_options' ) )  {
-			wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
+
+		if ( ! current_user_can( 'manage_options' ) )  {
+			wp_die( __( 'You do not have sufficient permissions to access this page.' ), __('Access denied'), array( 'response' => 401 ) );
 		}
 	
 		// Check nonce
 		if ( ! wp_verify_nonce($_POST['nonce'], 'travelmap') ) {
-			header( "Status: 401 Unauthorized" );
-			die( "Security check failed" );
+			wp_die( __( 'Security check failed.' ), __('Access denied'), array( 'response' => 401 ) );
 		}
+		
 		// Save data
 		if( update_option( 'travelmap_data', $_POST['places'] ) ) {
 			$response = 'updated';
