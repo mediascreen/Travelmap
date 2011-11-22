@@ -9,18 +9,19 @@ Author URI: http://travelingswede.com
 License: GPL2
 */
 
+// Initiates the plugin
 travelmap::init();
 
 /*
 TODO:
-- Move up config to constants
-- Move basic vars to top
-- Separate html to templates/includes
 - Separate maps to separate objects
-
 */
 class travelmap {
 	
+	/* Keeps track of if a shortcode has been used on the current page. Used to determine if we need to load the plugin resources. */
+	static protected $shortcodeUsed;
+	
+	/* The public path to plugin dir */
 	static protected $pluginPath; 
 	
 	/* The default attributes for map shortcode */
@@ -80,8 +81,7 @@ class travelmap {
 		<?php
 	
 		// Limits script output only to pages where shortcode is used
-		global $travel_shortcode_used;
-		$travel_shortcode_used = true;
+		self::$shortcodeUsed = true;
 	
 		// Returns the html required for the map
 		$map = '<div id="travelmap" style="height:' . $height . 'px; background:#FFFFFF; margin-bottom:1.5em;"></div>';
@@ -167,8 +167,7 @@ class travelmap {
 	
 	static public function print_js() {
 	
-		global $travel_shortcode_used;
-		if ( ! $travel_shortcode_used )
+		if ( ! self::$shortcodeUsed )
 			return;
 	
 		wp_register_script( 'google-maps', 'http://maps.google.com/maps/api/js?sensor=false', false, false, true );
