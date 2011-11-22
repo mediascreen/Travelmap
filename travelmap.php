@@ -20,9 +20,14 @@ TODO:
 
 */
 class travelmap {
+	
+	static protected $pluginPath; 
 
 
 	public function init() {
+		
+		self::$pluginPath = self::getPluginPath();
+		
 		add_shortcode( 'travelmap-map',   array( __class__, 'show_map' ) );
 		add_shortcode( 'travelmap-list',  array( __class__, 'show_list' ) );
 		
@@ -209,63 +214,10 @@ class travelmap {
 			wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
 		}
 	
-	?>
-	<div class="wrap">
-		<div class="icon32" id="icon-options-general"></div>
-		<h2>Travelmap destinations</h2>
-		<p>Add locations to show them on your map. Only <em>city</em> and <em>country</em> are obligatory. To automatically show where you are right now you need to fill in <em>arrival</em> date.</p>
-		<p>If you supply an <em>URL</em>, the city and country in the list will be linked. It needs to be a full URL (start with http://). Use it to link to, for example, a travel report, Wikipedia article or photo album.</p>
-		<p>Leave <em>latitude</em> and <em>longitude</em> empty to geocode the location automatically when you save. You should only input your own values if there is something wrong with the geocoding.</p>
-		<p>To show your map or list you insert shortcodes in your post or page.<br />
-		 For the map (height of map in pixels):<br />
-		<code>[travelmap-map height=400]</code><br />
-		For the list:<br />
-		<code>[travelmap-list]</code></p>
-		<p><a href="http://travelingswede.com/travelmap/">Plugin homepage</a></p>
-	
-		<table id="travelmap-admin-table" class="widefat" cellspacing="0">
-			<thead class="<?php echo wp_create_nonce( 'travelmap' );?>">
-				<tr>
-					<th scope="col" class="handle manage-column"></th>
-					<th scope="col" class="count manage-column"></th>
-					<th scope="col" class="city manage-column">City</th>
-					<th scope="col" class="country manage-column">Country</th>
-					<th scope="col" class="url manage-column">URL</th>
-					<th scope="col" class="arrival manage-column">Arrival</th>
-					<th scope="col" class="lat manage-column">Latitude</th>
-					<th scope="col" class="lng manage-column">Longitude</th>
-					<th scope="col" class="buttons1 manage-column"></th>
-					<th scope="col" class="buttons2 manage-column"></th>
-				</tr>
-			</thead>
-			<tbody>
-				<?php
-				// TODO: Unused? Remove?
-				$places = self::string_to_array( get_option( 'travelmap_data' ) );
-				if ( is_array($places) ) {
-					foreach ( $places as $place ) {
-						$i++;
-						echo
-						'<tr class="' . $place['status'] . '">
-							<td class="handle"><span class="image"></span></td>
-							<td class="count"> '. $i . '</td>
-							<td class="city">' . stripslashes($place['city']) . '</td>
-							<td class="country">' . stripslashes($place['country']) . '</td>
-							<td class="url">' . $place['url'] . '</td>
-							<td class="arrival">' . stripslashes($place['arrival']) . '</td>
-							<td class="lat">' . $place['lat'] . '</td>
-							<td class="lng">' . $place['lng'] . '</td>
-							<td class="buttons1"><a href="#" class="button-secondary edit" title="Edit row">Edit</a></td>
-							<td class="buttons2"><a href="#" class="delete" title="Delete row">Delete</a></td>
-						</tr>';
-					}
-				}
-				?>
-				</tbody>
-			</table>
-		<a id="add-location" class="button-secondary" href="#" title="Add row for new location">Add location</a>
-		</div>
-	<?php
+		$places = self::string_to_array( get_option( 'travelmap_data' ) );
+		if ( ! is_array($places) ) $places = array();	
+		
+		include 'inc/template-admin.php';
 	}
 	
 	
@@ -336,13 +288,13 @@ class travelmap {
 	
 	static public function add_stylesheet() {
 		wp_register_style( 'jquery-ui','http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/base/jquery-ui.css' );
-		wp_register_style( 'travelmap', self::get_plugin_path() . 'screen.css' );
+		wp_register_style( 'travelmap', self::$pluginPath . 'screen.css' );
 		wp_enqueue_style( 'jquery-ui' );
 		wp_enqueue_style( 'travelmap' );
 	}
 	
 	
-	static public function get_plugin_path() {
+	static public function getPluginPath() {
 		return WP_PLUGIN_URL . '/' . str_replace( basename( __FILE__ ), "", plugin_basename( __FILE__ ) );
 	}
 }
