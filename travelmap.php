@@ -22,6 +22,22 @@ TODO:
 class travelmap {
 	
 	static protected $pluginPath; 
+	
+	/* The default attributes for map shortcode */
+	static protected $mapDefaultAtts = array(
+		'height' => '300',
+		'first'  => 1,
+		'last'   => false,
+		'markers'=> true,
+		'lines'  => true,
+		'ssl'    => false
+	);
+	
+	/* The defautl attributes for list shortcode */
+	static protected $listDefaultAtts = array(
+		'first'  => 1,
+		'last'   => false
+	);
 
 
 	public function init() {
@@ -44,15 +60,7 @@ class travelmap {
 	static public function show_map( $atts ) {
 	
 		// Supported attributes with defaults
-		extract( shortcode_atts( array(
-			'height' => '300',
-			'first'  => 1,
-			'last'   => false,
-			'markers'=> true,
-			'lines'  => true,
-			'ssl'    => false
-		), $atts ) );
-	
+		extract( shortcode_atts( self::$mapDefaultAtts, $atts ) );
 	
 		// Outputs variables neded by later js-files
 		$places = self::string_to_array( get_option( 'travelmap_data' ) );
@@ -64,10 +72,10 @@ class travelmap {
 	
 		?>
 		<script type="text/javascript">
-		var travelmap_places = <?php echo json_encode( $places ); ?>;
-		var travelmap_plugin_dir = "<?php echo self::get_plugin_path();?>";
-		var travelmap_markers = "<?php echo $markers;?>";
-		var travelmap_lines = "<?php echo $lines;?>";
+		var travelmap_places = <?php echo json_encode( $places ) ?>;
+		var travelmap_plugin_dir = "<?php echo self::$pluginPath ?>";
+		var travelmap_markers = "<?php echo $markers ?>";
+		var travelmap_lines = "<?php echo $lines ?>";
 		</script>
 		<?php
 	
@@ -84,10 +92,7 @@ class travelmap {
 	
 	static public function show_list( $atts ) {
 	
-		extract( shortcode_atts( array(
-			'first'  => 1,
-			'last'   => false
-		), $atts ) );
+		extract( shortcode_atts( self::$listDefaultAtts, $atts ) );
 	
 		$places = self::string_to_array( get_option( 'travelmap_data' ) );
 		$i = 1;
@@ -107,10 +112,6 @@ class travelmap {
 			} else {
 				$printplace = stripslashes( $place['city'] ) . ', ' . stripslashes( $place['country'] );
 			}
-	
-			// TODO: write out days in each place
-			// Om denna har datum, kolla om i+1 har datum
-			// Ta fram skillnaden mellan båda strtotime som dagar
 	
 			$list .= '
 				<tr class="' . $place['status'] . '">
