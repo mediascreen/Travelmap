@@ -34,7 +34,8 @@ function initialize() {
 			location,
 			travelmap_places[i].city+', '+travelmap_places[i].country,
 			i,
-			travelmap_options.markerColor[travelmap_places[i].status]
+			travelmap_options.markerColor[travelmap_places[i].status],
+			travelmap_places[i].url
 		);
 
 		// Add position to propper line array
@@ -49,7 +50,6 @@ function initialize() {
 
 		// Extend markerBounds with each random point.
 		markerBounds.extend(location);
-
 	}
 
 	if (travelmap_lines == true) {
@@ -76,7 +76,7 @@ function drawConnector(locations, color) {
 }
 
 
-function addMarker(location, title, i, color) {
+function addMarker(location, title, i, color, url) {
 	if (travelmap_markers == "false" || travelmap_markers == false) return;
 
 	var zindex = i;
@@ -97,8 +97,16 @@ function addMarker(location, title, i, color) {
 		icon: icon,
 		zIndex: zindex
 	});
+	marker.url = url;
 
 	marker.setMap(travelmap_map);
+	
+	// Add event listener to marker
+	google.maps.event.addListener(marker, "click", function() {
+		if (this.url.length) {
+			window.location = this.url;
+		}
+	});
 }
 
 
