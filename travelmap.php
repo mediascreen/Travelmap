@@ -138,41 +138,21 @@ class travelmap {
 		self::$listAtts = shortcode_atts( self::$listDefaultAtts, self::fix_bool_atts( $atts ) );
 		
 		$places = self::string_to_array( get_option( 'travelmap_data' ) );
-		$i = 1;
-		$list = '<tr><th></th><th>Destination</th><th>Arrival</th></tr>';
-	
-		if ( ! is_array( $places ) )
-			return;
 	
 		// Filter out only the destinations that are supposed to be shown
 		$places = self::filter_places( $places, self::$listAtts['first'], self::$listAtts['last'] );
 		
+		if ( ! is_array( $places ) )
+			return;
+			
 		// Reverse order id reverse attr is set
 		if ( true === self::$mapAtts['reverse'] ) {
 			$places = array_reverse( $places );
 		}
-	
-		foreach ( $places as $place ) {
-	
-			$printdate = ( ! empty( $place['arrival'] ) ) ? date_i18n( "F j, Y", strtotime( stripslashes( $place['arrival'] ) ) ) : '-';
-	
-			if ( ! empty( $place['url'] ) ) {
-				$printplace = '<a href="' . $place['url'] . '">' . stripslashes( $place['city'] ) . ', ' . stripslashes( $place['country'] ) . '</a>';
-			} else {
-				$printplace = stripslashes( $place['city'] ) . ', ' . stripslashes( $place['country'] );
-			}
-	
-			$list .= '
-				<tr class="' . $place['status'] . '">
-					<td>' . $i . '</td>
-					<td>' . $printplace . '</td>
-					<td>' . $printdate  . '</td>
-				</tr>';
-	
-			$i++;
-		}
-	
-		return '<table id="travelmap-list">' . $list . '</table>';
+		
+		ob_start();
+		include 'inc/template-list.php';
+		return ob_get_clean();
 	}
 	
 	
