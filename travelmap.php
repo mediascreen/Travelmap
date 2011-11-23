@@ -30,19 +30,19 @@ class travelmap {
 	
 	/* The default attributes for map shortcode */
 	static protected $mapDefaultAtts = array(
-		'height'  => '300',
-		'first'   => 1,
-		'last'    => false,
-		'markers' => true,
-		'lines'   => true,
-		'maptype' => 'roadmap',
-		'ssl'     => false
+		'height'  => '300',          // Height of map in pixels (weight always 100% of container)
+		'first'   => 1,              // The first destination to show (a number or date). A negative number is counted from the end, the last destination being -1.
+		'last'    => false,          // The last destination to show (a number or a date). A negative number is counted from the end, the last destination being -1.
+		'markers' => true,           // Markers on or off
+		'lines'   => true,           // Lines on or off
+		'maptype' => 'roadmap',      // Maptype
+		'ssl'     => false           // SSL on or off for external resources (not active for admin interface)
 	);
 	
 	/* The defautl attributes for list shortcode */
 	static protected $listDefaultAtts = array(
-		'first'   => 1,
-		'last'    => false
+		'first'   => 1,              // The first destination to show (a number or date). A negative number is counted from the end, the last destination being -1.
+		'last'    => false           // The last destination to show (a number or date). A negative number is counted from the end, the last destination being -1.
 	);
 	
 	/* Used attributes - defaults overridden by specified atts */
@@ -84,7 +84,7 @@ class travelmap {
 		self::$mapAtts = shortcode_atts( self::$mapDefaultAtts, $atts );
 		
 		// Set protocol
-		if (self::$mapAtts['ssl']) {
+		if ( self::$mapAtts['ssl'] ) {
 			self::$protocol = 'https://';
 		}
 	
@@ -156,6 +156,7 @@ class travelmap {
 		if ( ! is_array( $places ) )
 			return;
 	
+		$placeCount = count( $places );
 		$filteredPlaces = array();
 		
 		// If first and last is valid dates we compare dates
@@ -171,9 +172,20 @@ class travelmap {
 			
 		// If first and last are not dates we assume they are integers
 		} else {
-			if ( !$last )
-				$last = count( $places );
-	
+			
+			// Handle missing last value
+			if ( !$last ) {
+				$last = $placeCount;
+			}
+			
+			// Handle negative values
+			if ( $first < 0 ) {
+				$first = $placeCount + ( $first + 1 );
+			}
+			if ( $last < 0 ) {
+				$last = $placeCount + ( $last + 1 );
+			}
+			
 			$filteredPlaces = array_slice( $places, $first-1, $last-($first-1) );
 		}
 	
@@ -234,7 +246,7 @@ class travelmap {
 	static public function options() {
 	
 		if ( !current_user_can( 'manage_options' ) )  {
-			wp_die( __( 'You do not have sufficient permissions to access this page.' ), __('Access denied'), array( 'response' => 401 ) );
+			wp_die( __( 'You do not have sufficient permissions to access this page.kk' ), __('Access denied'), array( 'response' => 401 ) );
 		}
 	
 		$places = self::string_to_array( get_option( 'travelmap_data' ) );
