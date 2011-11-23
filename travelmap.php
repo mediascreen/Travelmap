@@ -30,22 +30,23 @@ class travelmap {
 	
 	/* The default attributes for map shortcode */
 	static protected $mapDefaultAtts = array(
-		'height'    => '300',        // Height of map in pixels (weight always 100% of container)
-		'first'     => 1,            // The first destination to show (a number or date). A negative number is counted from the end, the last destination being -1.
-		'last'      => false,        // The last destination to show (a number or a date). A negative number is counted from the end, the last destination being -1.
-		'markers'   => true,         // Markers on or off
-		'numbers'   => true,         // Turns marker numbering on or off
-		'lines'     => true,         // Lines on or off
-		'reverse'   => false,        // Reverses destination order
-		'maptype'   => 'roadmap',    // Type of map: roadmap, satellite, hybrid or terrain. http://code.google.com/apis/maps/documentation/javascript/tutorial.html#MapOptions
-		'ssl'       => false         // SSL on or off for external resources (not active for admin interface)
+		'height'     => '300',        // Height of map in pixels (weight always 100% of container)
+		'first'      => 1,            // The first destination to show (a number or date). A negative number is counted from the end, the last destination being -1.
+		'last'       => false,        // The last destination to show (a number or a date). A negative number is counted from the end, the last destination being -1.
+		'markers'    => true,         // Markers on or off
+		'numbers'    => true,         // Turns marker numbering on or off
+		'lines'      => true,         // Lines on or off
+		'reverse'    => false,        // Reverses destination order
+		'maptype'    => 'roadmap',    // Type of map: roadmap, satellite, hybrid or terrain. http://code.google.com/apis/maps/documentation/javascript/tutorial.html#MapOptions
+		'ssl'        => false         // SSL on or off for external resources (not active for admin interface)
 	);
 	
 	/* The defautl attributes for list shortcode */
 	static protected $listDefaultAtts = array(
-		'first'     => 1,            // The first destination to show (a number or date). A negative number is counted from the end, the last destination being -1.
-		'last'      => false,         // The last destination to show (a number or date). A negative number is counted from the end, the last destination being -1.
-		'reverse'   => false        // Reverses destination order
+		'first'      => 1,            // The first destination to show (a number or date). A negative number is counted from the end, the last destination being -1.
+		'last'       => false,        // The last destination to show (a number or date). A negative number is counted from the end, the last destination being -1.
+		'reverse'    => false,        // Reverses destination order
+		'dateformat' => false         // Sets custom date format. Default is the blog default format. http://codex.wordpress.org/Formatting_Date_and_Time
 	);
 	
 	/* Used attributes - defaults overridden by specified atts */
@@ -83,6 +84,7 @@ class travelmap {
 		add_action( 'wp_ajax_nopriv_travelmap_ajax_save', array( __class__, 'ajax_save' ) );
 		add_action( 'wp_ajax_travelmap_ajax_save',        array( __class__, 'ajax_save' ) );
 	}
+
 
 	/**
 	 * The travelmap-map shortcode method
@@ -136,6 +138,10 @@ class travelmap {
 	static public function show_list( $atts ) {
 	
 		self::$listAtts = shortcode_atts( self::$listDefaultAtts, self::fix_bool_atts( $atts ) );
+		
+		// Set format of dates in list
+		$dateFormat = ( false !== self::$listAtts['dateformat'] ) ? self::$listAtts['dateformat'] : get_option('date_format');
+			
 		
 		$places = self::string_to_array( get_option( 'travelmap_data' ) );
 	
@@ -211,6 +217,7 @@ class travelmap {
 		return checkdate( (int)$m, (int)$d, (int)$y );
 	}
 	
+	
 	/** 
 	 * Ads needed javascript libraries on pages where the plugin is used 
 	 */
@@ -233,6 +240,7 @@ class travelmap {
 	static public function menu() {
 		add_options_page( 'Travelmap Options', 'Travelmap', 'manage_options', 'travelmap-options', array( __class__, 'options' ) );
 	}
+	
 	
 	/** 
 	 * Ads needed javascript libraries on the Travelmap plugin admin page 
@@ -258,6 +266,7 @@ class travelmap {
 		register_setting( 'travelmap_settings', 'travelmap_data' );
 	}
 	
+	
 	/** 
 	 * Prepares and outputs plugin admin options page
 	 * Includes a template file for the actual html 
@@ -273,6 +282,7 @@ class travelmap {
 		
 		include 'inc/template-admin.php';
 	}
+	
 	
 	/** 
 	 * Handles the ajax posts to save destination data
@@ -300,6 +310,7 @@ class travelmap {
 		echo $response;
 		exit;
 	}
+	
 	
 	/** 
 	 * Transforms the stored string of destination info to an array
@@ -332,6 +343,7 @@ class travelmap {
 		return $newPlaces;
 	}
 	
+	
 	/** 
 	 * Check if a date is in the past, present or future 
 	 */
@@ -349,6 +361,7 @@ class travelmap {
 		return $status;
 	}
 	
+	
 	/** 
 	 * Add stylesheets to both admin and shortcode pages
 	 * TODO: Break up into separate methods for admin and public
@@ -360,12 +373,14 @@ class travelmap {
 		wp_enqueue_style( 'travelmap' );
 	}
 	
+	
 	/** 
 	 * Get the web path to this directory 
 	 */
 	static protected function get_plugin_path() {
 		return WP_PLUGIN_URL . '/' . str_replace( basename( __FILE__ ), "", plugin_basename( __FILE__ ) );
 	}
+	
 	
 	/**
 	 * Messy way to ensure we have actual boolean values as attributes

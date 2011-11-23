@@ -16,7 +16,7 @@
 			<td><?php echo stripslashes( $place['city'] ) ?>, <?php echo stripslashes( $place['country'] ) ?></td>
 		<?php } ?>
 		
-		<td><?php echo ! empty( $place['arrival'] ) ? date_i18n( "F j, Y", strtotime( stripslashes( $place['arrival'] ) ) ) : '-' ?></td>
+		<td><?php echo ! empty( $place['arrival'] ) ? date_i18n( $dateFormat, strtotime( stripslashes( $place['arrival'] ) ) ) : '-' ?></td>
 	
 	</tr>
 	
