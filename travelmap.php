@@ -127,7 +127,7 @@ class travelmap {
 		self::$shortcodeUsed = true;
 	
 		// Returns the html required for the map
-		return '<div id="travelmap" style="height:' . self::$mapAtts['height'] . 'px; background:#FFFFFF; margin-bottom:1.5em;"></div>';
+		return '<div id="travelmap" style="height:' . self::$mapAtts['height'] . 'px;"></div>';
 	}
 
 	

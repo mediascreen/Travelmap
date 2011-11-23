@@ -1,4 +1,11 @@
 /* Public facing styles */
+#travelmap {
+	background:#FFFFFF;
+	margin-bottom:1.5em;
+}
+#travelmap img { 
+	max-width: none;
+}
 #travelmap-list {
 	border-collapse:collapse;
 	width:100%;
