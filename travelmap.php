@@ -35,7 +35,7 @@ class travelmap {
 		'last'    => false,          // The last destination to show (a number or a date). A negative number is counted from the end, the last destination being -1.
 		'markers' => true,           // Markers on or off
 		'lines'   => true,           // Lines on or off
-		'maptype' => 'roadmap',      // Maptype
+		'maptype' => 'roadmap',      // Type of map: roadmap, satellite, hybrid or terrain. http://code.google.com/apis/maps/documentation/javascript/tutorial.html#MapOptions
 		'ssl'     => false           // SSL on or off for external resources (not active for admin interface)
 	);
 	
@@ -61,9 +61,12 @@ class travelmap {
 	static protected $pluginPath; 
 
 
+	/**
+	 * Initiates the plugin by registering shortcodes and actions 
+	 */
 	public function init() {
 		
-		self::$pluginPath = self::getPluginPath();
+		self::$pluginPath = self::get_plugin_path();
 		
 		add_shortcode( 'travelmap-map',   array( __class__, 'show_map' ) );
 		add_shortcode( 'travelmap-list',  array( __class__, 'show_list' ) );
@@ -78,6 +81,10 @@ class travelmap {
 		add_action( 'wp_ajax_travelmap_ajax_save',        array( __class__, 'ajax_save' ) );
 	}
 
+	/**
+	 * The travelmap-map shortcode method
+	 * Prepares and outputs map data and html
+	 */
 	static public function show_map( $atts ) {
 	
 		// Set attributes
@@ -113,7 +120,10 @@ class travelmap {
 	}
 
 	
-	
+	/**
+	 * The travelmap-list shortcode method
+	 * Prepares and outputs list html
+	 */
 	static public function show_list( $atts ) {
 	
 		self::$listAtts = shortcode_atts( self::$listDefaultAtts, $atts );
@@ -151,8 +161,11 @@ class travelmap {
 	}
 	
 	
-	// Filter array of places to only contain entries between $first and $last from shortcode atts
-	static public function filter_places( $places, $first, $last ) {
+	/**
+	 * Filter array of places to only contain entries between $first and $last from shortcode atts
+	 * Handles dates, positive and negative values
+	 */
+	static protected function filter_places( $places, $first, $last ) {
 		if ( ! is_array( $places ) )
 			return;
 	
@@ -193,14 +206,19 @@ class travelmap {
 	}
 	
 	
-	// $date has to be in ISO 8601 format, ex. 2010-12-30
-	static public function isValidDate( $date ) {
+	/** 
+	 * Checks if a date is valid
+	 * $date has to be in ISO 8601 format, ex. 2010-12-30
+	 */
+	static protected function isValidDate( $date ) {
 		$date = substr( $date, 0, 10 );
 		list( $y, $m, $d ) = explode( '-', $date );
 		return checkdate( (int)$m, (int)$d, (int)$y );
 	}
 	
-	
+	/** 
+	 * Ads needed javascript libraries on pages where the plugin is used 
+	 */
 	static public function print_js() {
 	
 		if ( ! self::$shortcodeUsed )
@@ -214,12 +232,16 @@ class travelmap {
 	}
 	
 	
-	
+	/** 
+	 * Ads a Travelmap nav item to admin options menu
+	 */
 	static public function menu() {
 		add_options_page( 'Travelmap Options', 'Travelmap', 'manage_options', 'travelmap-options', array( __class__, 'options' ) );
 	}
 	
-	
+	/** 
+	 * Ads needed javascript libraries on the Travelmap plugin admin page 
+	 */
 	static public function admin_init() {
 	
 		if ( $_GET['page'] !== 'travelmap-options')
@@ -238,11 +260,13 @@ class travelmap {
 		wp_enqueue_script( 'travelmap_admin' );
 	
 		// Register settings
-		register_setting( 'travelmap_settings', 'travelmap_data', 'travelmap_textarea_to_array' );
+		register_setting( 'travelmap_settings', 'travelmap_data' );
 	}
 	
-	
-	// Main function for outputing options page
+	/** 
+	 * Prepares and outputs plugin admin options page
+	 * Includes a template file for the actual html 
+	 */
 	static public function options() {
 	
 		if ( !current_user_can( 'manage_options' ) )  {
@@ -255,7 +279,9 @@ class travelmap {
 		include 'inc/template-admin.php';
 	}
 	
-	
+	/** 
+	 * Handles the ajax posts to save destination data
+	 */
 	static public function ajax_save() {
 
 		if ( ! current_user_can( 'manage_options' ) )  {
@@ -280,8 +306,11 @@ class travelmap {
 		exit;
 	}
 	
-	
-	static public function string_to_array( $input ) {
+	/** 
+	 * Transforms the stored string of destination info to an array
+	 * TODO: Send as JSON and store as serialized array instead?
+	 */
+	static protected function string_to_array( $input ) {
 		$input = trim( $input, " ;\n" );
 		if ( empty($input) )
 			return false;
@@ -296,8 +325,10 @@ class travelmap {
 		return $places;
 	}
 	
-	
-	static public function add_status( $places, $status = 'past' ) {
+	/** 
+	 * Add information about time status to each destination to use different colors for markers
+	 */
+	static protected function add_status( $places, $status = 'past' ) {
 		foreach ($places as $place) {
 			$i++;
 			$place['status'] = $status = self::get_date_status( $places[$i]['arrival'], $status );
@@ -306,8 +337,11 @@ class travelmap {
 		return $newPlaces;
 	}
 	
+	/** 
+	 * Check if a date is in the past, present or future 
+	 */
 	// TODO: Use propper date functions
-	static public function get_date_status( $date, $prevStatus = 'past') {
+	static protected function get_date_status( $date, $prevStatus = 'past') {
 		if ($prevStatus == 'past') {
 			if (strtotime( $date ) > time() ) {
 				$status = 'present';
@@ -320,7 +354,10 @@ class travelmap {
 		return $status;
 	}
 	
-	
+	/** 
+	 * Add stylesheets to both admin and shortcode pages
+	 * TODO: Break up into separate methods for admin and public
+	 */
 	static public function add_stylesheet() {
 		wp_register_style( 'jquery-ui', self::$protocol . self::$jQueryCssUrl );
 		wp_register_style( 'travelmap', self::$pluginPath . 'screen.css' );
@@ -328,8 +365,10 @@ class travelmap {
 		wp_enqueue_style( 'travelmap' );
 	}
 	
-	
-	static public function getPluginPath() {
+	/** 
+	 * Get the web path to this directory 
+	 */
+	static protected function get_plugin_path() {
 		return WP_PLUGIN_URL . '/' . str_replace( basename( __FILE__ ), "", plugin_basename( __FILE__ ) );
 	}
 }
