@@ -139,10 +139,6 @@ class travelmap {
 	
 		self::$listAtts = shortcode_atts( self::$listDefaultAtts, self::fix_bool_atts( $atts ) );
 		
-		// Set format of dates in list
-		$dateFormat = ( false !== self::$listAtts['dateformat'] ) ? self::$listAtts['dateformat'] : get_option('date_format');
-			
-		
 		$places = self::string_to_array( get_option( 'travelmap_data' ) );
 	
 		// Filter out only the destinations that are supposed to be shown
@@ -155,6 +151,10 @@ class travelmap {
 		if ( true === self::$mapAtts['reverse'] ) {
 			$places = array_reverse( $places );
 		}
+		
+		// Set format of dates in list
+		$dateFormat = ( false !== self::$listAtts['dateformat'] ) ? self::$listAtts['dateformat'] : get_option( 'date_format' );
+		$showDateCol = self::are_there_dates( $places );
 		
 		ob_start();
 		include 'inc/template-list.php';
@@ -215,6 +215,19 @@ class travelmap {
 		$date = substr( $date, 0, 10 );
 		list( $y, $m, $d ) = explode( '-', $date );
 		return checkdate( (int)$m, (int)$d, (int)$y );
+	}
+	
+	
+	/** 
+	 * Checks if any destinations uses has dates
+	 */
+	static protected function are_there_dates( $places ) {
+		foreach( $places as $place ) {
+			if ( ! empty($place['arrival']) ) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	

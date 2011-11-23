@@ -1,6 +1,12 @@
 <table id="travelmap-list">
 	
-	<tr><th></th><th>Destination</th><th>Arrival</th></tr>
+	<tr>
+		<th></th>
+		<th>Destination</th>
+		<?php if ( $showDateCol ) { ?>
+		<th>Arrival</th>
+		<?php } ?>
+	</tr>
 	
 	<?php $i = 1 ?>
 	
@@ -16,7 +22,9 @@
 			<td><?php echo stripslashes( $place['city'] ) ?>, <?php echo stripslashes( $place['country'] ) ?></td>
 		<?php } ?>
 		
-		<td><?php echo ! empty( $place['arrival'] ) ? date_i18n( $dateFormat, strtotime( stripslashes( $place['arrival'] ) ) ) : '-' ?></td>
+		<?php if ( $showDateCol ) { ?>
+			<td><?php echo ! empty( $place['arrival'] ) ? date_i18n( $dateFormat, strtotime( stripslashes( $place['arrival'] ) ) ) : '-' ?></td>
+		<?php } ?>
 	
 	</tr>
 	
