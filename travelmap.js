@@ -77,12 +77,12 @@ function drawConnector(locations, color) {
 
 
 function addMarker(location, title, i, color, url) {
-	if (travelmap_markers == "false" || travelmap_markers == false) return;
+	if (travelmap_markers == false) return;
 
 	var zindex = i;
 	if (color == 'k') zindex = 999;
 
-	if (i < 100) {
+	if (travelmap_numbers == true && i < 100) {
 		iconurl = travelmap_plugin_dir+'img/markers/'+color+(i+1)+'.png';
 	} else {
 		iconurl = travelmap_plugin_dir+'img/markers/'+color+'.png';

@@ -30,19 +30,20 @@ class travelmap {
 	
 	/* The default attributes for map shortcode */
 	static protected $mapDefaultAtts = array(
-		'height'  => '300',          // Height of map in pixels (weight always 100% of container)
-		'first'   => 1,              // The first destination to show (a number or date). A negative number is counted from the end, the last destination being -1.
-		'last'    => false,          // The last destination to show (a number or a date). A negative number is counted from the end, the last destination being -1.
-		'markers' => true,           // Markers on or off
-		'lines'   => true,           // Lines on or off
-		'maptype' => 'roadmap',      // Type of map: roadmap, satellite, hybrid or terrain. http://code.google.com/apis/maps/documentation/javascript/tutorial.html#MapOptions
-		'ssl'     => false           // SSL on or off for external resources (not active for admin interface)
+		'height'    => '300',        // Height of map in pixels (weight always 100% of container)
+		'first'     => 1,            // The first destination to show (a number or date). A negative number is counted from the end, the last destination being -1.
+		'last'      => false,        // The last destination to show (a number or a date). A negative number is counted from the end, the last destination being -1.
+		'markers'   => true,         // Markers on or off
+		'numbers'   => true,        // Turns marker numbering on or off
+		'lines'     => true,         // Lines on or off
+		'maptype'   => 'roadmap',    // Type of map: roadmap, satellite, hybrid or terrain. http://code.google.com/apis/maps/documentation/javascript/tutorial.html#MapOptions
+		'ssl'       => false         // SSL on or off for external resources (not active for admin interface)
 	);
 	
 	/* The defautl attributes for list shortcode */
 	static protected $listDefaultAtts = array(
-		'first'   => 1,              // The first destination to show (a number or date). A negative number is counted from the end, the last destination being -1.
-		'last'    => false           // The last destination to show (a number or date). A negative number is counted from the end, the last destination being -1.
+		'first'     => 1,            // The first destination to show (a number or date). A negative number is counted from the end, the last destination being -1.
+		'last'      => false         // The last destination to show (a number or date). A negative number is counted from the end, the last destination being -1.
 	);
 	
 	/* Used attributes - defaults overridden by specified atts */
@@ -106,8 +107,9 @@ class travelmap {
 		<script type="text/javascript">
 		var travelmap_places     = <?php echo json_encode( $places ) ?>;
 		var travelmap_plugin_dir = "<?php echo self::$pluginPath ?>";
-		var travelmap_markers    = "<?php echo self::$mapAtts['markers'] ?>";
-		var travelmap_lines      = "<?php echo self::$mapAtts['lines'] ?>";
+		var travelmap_markers    = <?php echo self::$mapAtts['markers'] === true ? 'true' : 'false' ?>;
+		var travelmap_lines      = <?php echo self::$mapAtts['lines']   === true ? 'true' : 'false' ?>;
+		var travelmap_numbers    = <?php echo self::$mapAtts['numbers'] === true ? 'true' : 'false' ?>;
 		var travelmap_maptype    = "<?php echo strtoupper(self::$mapAtts['maptype']) ?>";
 		</script>
 		<?php
