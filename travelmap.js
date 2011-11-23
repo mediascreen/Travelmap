@@ -82,7 +82,7 @@ function addMarker(location, title, i, color, url) {
 	var zindex = i;
 	if (color == 'k') zindex = 999;
 
-	if (travelmap_numbers == true && i < 100) {
+	if (travelmap_numbers === true && i < 100) {
 		iconurl = travelmap_plugin_dir+'img/markers/'+color+(i+1)+'.png';
 	} else {
 		iconurl = travelmap_plugin_dir+'img/markers/'+color+'.png';

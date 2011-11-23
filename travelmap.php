@@ -34,8 +34,9 @@ class travelmap {
 		'first'     => 1,            // The first destination to show (a number or date). A negative number is counted from the end, the last destination being -1.
 		'last'      => false,        // The last destination to show (a number or a date). A negative number is counted from the end, the last destination being -1.
 		'markers'   => true,         // Markers on or off
-		'numbers'   => true,        // Turns marker numbering on or off
+		'numbers'   => true,         // Turns marker numbering on or off
 		'lines'     => true,         // Lines on or off
+		'reverse'   => false,        // Reverses destination order
 		'maptype'   => 'roadmap',    // Type of map: roadmap, satellite, hybrid or terrain. http://code.google.com/apis/maps/documentation/javascript/tutorial.html#MapOptions
 		'ssl'       => false         // SSL on or off for external resources (not active for admin interface)
 	);
@@ -43,7 +44,8 @@ class travelmap {
 	/* The defautl attributes for list shortcode */
 	static protected $listDefaultAtts = array(
 		'first'     => 1,            // The first destination to show (a number or date). A negative number is counted from the end, the last destination being -1.
-		'last'      => false         // The last destination to show (a number or date). A negative number is counted from the end, the last destination being -1.
+		'last'      => false,         // The last destination to show (a number or date). A negative number is counted from the end, the last destination being -1.
+		'reverse'   => false        // Reverses destination order
 	);
 	
 	/* Used attributes - defaults overridden by specified atts */
@@ -89,7 +91,7 @@ class travelmap {
 	static public function show_map( $atts ) {
 	
 		// Set attributes
-		self::$mapAtts = shortcode_atts( self::$mapDefaultAtts, $atts );
+		self::$mapAtts = shortcode_atts( self::$mapDefaultAtts, self::fix_bool_atts( $atts ) );
 		
 		// Set protocol
 		if ( self::$mapAtts['ssl'] ) {
@@ -100,8 +102,13 @@ class travelmap {
 		$places = self::string_to_array( get_option( 'travelmap_data' ) );
 	
 		$places = self::filter_places( $places, self::$mapAtts['first'], self::$mapAtts['last'] );
-		if ($places === false)
+		if ( false === $places )
 			return;
+	
+		// Reverse order id reverse attr is set
+		if ( true === self::$mapAtts['reverse'] ) {
+			$places = array_reverse($places);
+		}
 	
 		?>
 		<script type="text/javascript">
@@ -128,22 +135,28 @@ class travelmap {
 	 */
 	static public function show_list( $atts ) {
 	
-		self::$listAtts = shortcode_atts( self::$listDefaultAtts, $atts );
+		self::$listAtts = shortcode_atts( self::$listDefaultAtts, self::fix_bool_atts( $atts ) );
 		
 		$places = self::string_to_array( get_option( 'travelmap_data' ) );
 		$i = 1;
 		$list = '<tr><th></th><th>Destination</th><th>Arrival</th></tr>';
 	
-		if ( ! is_array($places) )
+		if ( ! is_array( $places ) )
 			return;
 	
+		// Filter out only the destinations that are supposed to be shown
 		$places = self::filter_places( $places, self::$listAtts['first'], self::$listAtts['last'] );
+		
+		// Reverse order id reverse attr is set
+		if ( true === self::$mapAtts['reverse'] ) {
+			$places = array_reverse( $places );
+		}
 	
 		foreach ( $places as $place ) {
 	
-			$printdate = ( !empty( $place['arrival'] ) ) ? date_i18n( "F j, Y", strtotime( stripslashes( $place['arrival'] ) ) ) : '-';
+			$printdate = ( ! empty( $place['arrival'] ) ) ? date_i18n( "F j, Y", strtotime( stripslashes( $place['arrival'] ) ) ) : '-';
 	
-			if ( !empty( $place['url'] ) ) {
+			if ( ! empty( $place['url'] ) ) {
 				$printplace = '<a href="' . $place['url'] . '">' . stripslashes( $place['city'] ) . ', ' . stripslashes( $place['country'] ) . '</a>';
 			} else {
 				$printplace = stripslashes( $place['city'] ) . ', ' . stripslashes( $place['country'] );
@@ -189,7 +202,7 @@ class travelmap {
 		} else {
 			
 			// Handle missing last value
-			if ( !$last ) {
+			if ( ! $last ) {
 				$last = $placeCount;
 			}
 			
@@ -246,7 +259,7 @@ class travelmap {
 	 */
 	static public function admin_init() {
 	
-		if ( $_GET['page'] !== 'travelmap-options')
+		if ( $_GET['page'] !== 'travelmap-options' )
 			return;
 	
 		// Include javascript
@@ -314,7 +327,7 @@ class travelmap {
 	 */
 	static protected function string_to_array( $input ) {
 		$input = trim( $input, " ;\n" );
-		if ( empty($input) )
+		if ( empty( $input ) )
 			return false;
 		$rows = explode( ";", $input );
 	
@@ -331,7 +344,7 @@ class travelmap {
 	 * Add information about time status to each destination to use different colors for markers
 	 */
 	static protected function add_status( $places, $status = 'past' ) {
-		foreach ($places as $place) {
+		foreach ( $places as $place ) {
 			$i++;
 			$place['status'] = $status = self::get_date_status( $places[$i]['arrival'], $status );
 			$newPlaces[] = $place;
@@ -343,8 +356,8 @@ class travelmap {
 	 * Check if a date is in the past, present or future 
 	 */
 	// TODO: Use propper date functions
-	static protected function get_date_status( $date, $prevStatus = 'past') {
-		if ($prevStatus == 'past') {
+	static protected function get_date_status( $date, $prevStatus = 'past' ) {
+		if ( $prevStatus == 'past' ) {
 			if (strtotime( $date ) > time() ) {
 				$status = 'present';
 			} else {
@@ -373,4 +386,25 @@ class travelmap {
 	static protected function get_plugin_path() {
 		return WP_PLUGIN_URL . '/' . str_replace( basename( __FILE__ ), "", plugin_basename( __FILE__ ) );
 	}
+	
+	/**
+	 * Messy way to ensure we have actual boolean values as attributes
+	 * Must be a better way to solve this
+	 */
+	static protected function fix_bool_atts( $atts ) {
+		if ( ! is_array( $atts ) ) {
+			$atts = array();
+		}
+		
+		foreach ( $atts as $key => $value ) {
+			$value = strtolower($value);
+			if ( 'true' === $value ) {
+				$atts[$key] = true;
+			} elseif ( 'false' === $value ) {
+				$atts[$key] = false;
+			}
+		}
+		return $atts;
+	}
+	
 }
