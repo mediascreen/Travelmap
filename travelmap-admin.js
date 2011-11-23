@@ -197,14 +197,19 @@ function travelmap_geocode(address, row) {
 		if (status == google.maps.GeocoderStatus.OK) {
 			var lat = results[0].geometry.location.lat();
 			var lng = results[0].geometry.location.lng();
-			jQuery("td:eq(6)", row).text(lat);
-			jQuery("td:eq(7)", row).text(lng);
+			jQuery("td:eq(6)", row).text(dec_round(lat, 6));
+			jQuery("td:eq(7)", row).text(dec_round(lng, 6));
 			jQuery('.edit.button-primary', row).text('Saving...');
 			travelmap_save_table();
 		} else {
-			alert("Geocode was not successful for the following reason: " + status);
+			alert("Geocoding was not successful: " + status);
 		}
 	});
+}
+
+function dec_round(value, decimals) {
+	var power = Math.pow(10, decimals || 0);
+	return String(Math.round(value * power) / power);
 }
 
 
